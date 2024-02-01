@@ -7,9 +7,9 @@ scrape_configs:
     scheme: https
     basic_auth:
       username: 'user'
-      password: 'password'
+      password: '123456'
     tls_config:
       ca_file: /etc/prometheus/cert.pem
-      # insecure_skip_verify: true
+      insecure_skip_verify: true
     static_configs:
       - targets: ['host.docker.internal:8443']

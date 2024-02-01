@@ -2,12 +2,15 @@ package org.wsd.app.security;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.util.Base64;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -15,21 +18,23 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.annotation.web.configurers.RequestCacheConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
-import org.wsd.app.jwt.JwtConfig;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.wsd.app.security.jwt.JwtConfig;
+import org.wsd.app.repository.UserRepository;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -45,20 +50,23 @@ public class SecurityConfig {
             "/v1/spring-boot-app/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
+            "/swagger-ui.html",
     };
 
     @Value("${http.port}")
     private int httpPort;
     @Value("${server.port}")
     private int redirectToHttpsPort;
-
     private final JwtConfig jwtConfig;
+    private final UserRepository userRepository;
 
-    public SecurityConfig(JwtConfig jwtConfig) {
+    public SecurityConfig(JwtConfig jwtConfig, UserRepository userRepository) {
         this.jwtConfig = jwtConfig;
+        this.userRepository = userRepository;
     }
 
     @Bean
+    @Transactional(isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRED, readOnly = true)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(AbstractHttpConfigurer::disable)
@@ -66,11 +74,14 @@ public class SecurityConfig {
                 .headers(headers -> headers.httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true)))
                 .requestCache(RequestCacheConfigurer::disable)
                 .sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .userDetailsService(userDetailsService())
+                .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers(PUBLIC_URLS).permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/auth/*").permitAll()
-                                .requestMatchers("/actuator/**").hasRole("ACTUATOR_ADMIN")
+                                .requestMatchers("/actuator/**")
+                                .authenticated()
                                 .anyRequest().authenticated()
                 )
                 .headers(config -> {
@@ -96,6 +107,32 @@ public class SecurityConfig {
     }
 
     @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    @Transactional(isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRED, readOnly = true)
+    public UserDetailsService userDetailsService() {
+        return username -> userRepository.findUserEntityByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found."));
+    }
+
+    @Bean
+    @Transactional(isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRED, readOnly = true)
+    public AuthenticationProvider authenticationProvider() {
+        final DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
+        authenticationProvider.setUserDetailsService(userDetailsService());
+        return authenticationProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
     public JwtDecoder jwtDecoder() {
         NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(getSecretKey()).macAlgorithm(MacAlgorithm.HS512).build();
         return token -> {
@@ -116,19 +153,8 @@ public class SecurityConfig {
 
 
     private SecretKey getSecretKey() {
-        byte[] keyBytes = Base64.from("MzJmZDkwNjk0ZDY1OGZkYThlZjM3YTY3MTk4ZGQyMmZmN2Q5MTljY2I5OGNjZjZiMzA0YTFhYWJhNDUyMzZiMzViMTA1MTJhNTY0YzlhMWNiZmNkOGE3YjY0OTNkNWMzODJkOTU1ZmJlNDUxOWZlNzNhZTQ2MGFkNDIwYmZiNGM=").decode();
+        byte[] keyBytes = Base64.from(jwtConfig.getSecret()).decode();
         return new SecretKeySpec(keyBytes, 0, keyBytes.length, MacAlgorithm.HS512.getName());
-    }
-
-
-    @Bean
-    public InMemoryUserDetailsManager userDetailsService() {
-        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        UserDetails user = User.withUsername("user")
-                .password(encoder.encode("password"))
-                .roles("ACTUATOR_ADMIN")
-                .build();
-        return new InMemoryUserDetailsManager(user);
     }
 
 }

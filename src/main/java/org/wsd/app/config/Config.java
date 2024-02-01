@@ -3,6 +3,7 @@ package org.wsd.app.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.auditing.DateTimeProvider;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,9 +17,12 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.data.domain.AuditorAware;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableScheduling
+@EnableTransactionManagement
+@EnableJpaAuditing(auditorAwareRef = "auditorAware")
 public class Config {
     @Bean
     public AuditorAware<String> auditorAware() {

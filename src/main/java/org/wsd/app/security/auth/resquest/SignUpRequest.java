@@ -1,4 +1,4 @@
-package org.wsd.app.security.auth;
+package org.wsd.app.security.auth.resquest;
 
 import lombok.Data;
 import lombok.ToString;

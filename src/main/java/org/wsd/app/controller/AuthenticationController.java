@@ -1,20 +1,19 @@
 package org.wsd.app.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.extern.java.Log;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-import org.wsd.app.jwt.JwtConfig;
-import org.wsd.app.security.auth.SignInRequest;
-import org.wsd.app.security.auth.SignUpRequest;
+import org.springframework.web.bind.annotation.*;
+import org.wsd.app.security.jwt.JwtConfig;
+import org.wsd.app.security.auth.resquest.SignInRequest;
+import org.wsd.app.security.auth.resquest.SignUpRequest;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -28,15 +27,27 @@ public class AuthenticationController {
     private final JwtConfig jwtConfig;
     private final JwtEncoder jwtEncoder;
 
-    public AuthenticationController(JwtConfig jwtConfig, JwtEncoder jwtEncoder) {
+    private final AuthenticationManager authenticationManager;
+
+    public AuthenticationController(JwtConfig jwtConfig, JwtEncoder jwtEncoder, AuthenticationManager authenticationManager) {
         this.jwtConfig = jwtConfig;
         this.jwtEncoder = jwtEncoder;
+        this.authenticationManager = authenticationManager;
     }
 
-    @RequestMapping(method = RequestMethod.POST, path = "/signIn")
-    public String signIn(@RequestBody SignInRequest signInRequest) {
+    @PostMapping(path = "/signIn", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public String signIn(@Valid @RequestBody SignInRequest signInRequest) {
+
+        final UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                signInRequest.getUsername(),
+                signInRequest.getPassword()
+        );
+
+        Authentication authenticate = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(authenticate);
+
         Instant now = Instant.now();
-        Instant validity = now.plus(1, ChronoUnit.MINUTES);
+        Instant validity = now.plus(jwtConfig.getExpiration(), ChronoUnit.MINUTES);
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now)
@@ -48,8 +59,8 @@ public class AuthenticationController {
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
     }
 
-    @RequestMapping(method = RequestMethod.POST, path = "/signUp")
-    public String signUp(@RequestBody SignUpRequest signUpRequest) {
+    @PostMapping(path = "/signUp", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public String signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
         return "Hello World!";
     }
 
