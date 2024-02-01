@@ -24,7 +24,19 @@ public class SecurityConfig {
                                 .requestMatchers("/actuator/**").hasRole("ACTUATOR_ADMIN")
                                 .requestMatchers("/").permitAll()
                                 .anyRequest().authenticated()
-                ).httpBasic(Customizer.withDefaults());
+                )
+                .headers(httpSecurityHeadersConfigurer -> {
+                    httpSecurityHeadersConfigurer.frameOptions(
+                            frameOptionsConfig -> {
+                                frameOptionsConfig.disable();
+                                frameOptionsConfig.sameOrigin().disable();
+                            }
+                    );
+                })
+                .portMapper(
+                        httpPortMapper -> httpPortMapper.http(80).mapsTo(8443)
+                )
+                .httpBasic(Customizer.withDefaults());
         return http.build();
     }
 

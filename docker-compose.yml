@@ -105,6 +105,14 @@ services:
     ports:
       - "5432:5432"
 
+  # Zipkin for Distributed Network Tracing
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+
+
 networks:
   localprom:
     driver: bridge
