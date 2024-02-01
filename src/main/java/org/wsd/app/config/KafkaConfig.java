@@ -21,14 +21,6 @@ import static org.springframework.transaction.support.AbstractPlatformTransactio
 @Configuration
 public class KafkaConfig {
 
-
-    /*@Bean
-    public KafkaTransactionManager<String, String> kafkaTransactionManager(ProducerFactory<String, String> producerFactory) {
-        KafkaTransactionManager<String, String> transactionManager = new KafkaTransactionManager<>(producerFactory);
-        transactionManager.setTransactionSynchronization(SYNCHRONIZATION_ON_ACTUAL_TRANSACTION);
-        return transactionManager;
-    }*/
-
     @Bean
     public KafkaAdmin kafkaAdmin() {
         Map<String, Object> configs = new HashMap<>();
