@@ -1,4 +1,4 @@
-package org.wsd.app.kafka;
+package org.wsd.app.messaging.subs;
 
 import lombok.extern.java.Log;
 import org.springframework.kafka.annotation.KafkaListener;

@@ -1,5 +1,8 @@
 package org.wsd.app.security;
 
+import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import com.nimbusds.jose.util.Base64;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +19,9 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -23,6 +29,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import org.wsd.app.jwt.JwtConfig;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 @Configuration
 @EnableWebSecurity
@@ -42,6 +52,12 @@ public class SecurityConfig {
     @Value("${server.port}")
     private int redirectToHttpsPort;
 
+    private final JwtConfig jwtConfig;
+
+    public SecurityConfig(JwtConfig jwtConfig) {
+        this.jwtConfig = jwtConfig;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -53,9 +69,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers(PUBLIC_URLS).permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/auth/*").permitAll()
                                 .requestMatchers("/actuator/**").hasRole("ACTUATOR_ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/api/auth/authenticate").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/auth/authenticate").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .headers(config -> {
@@ -73,8 +88,36 @@ public class SecurityConfig {
                 .requiresChannel(channelRequestMatcherRegistry -> {
                     channelRequestMatcherRegistry.anyRequest().requiresSecure();
                 })
+                .oauth2ResourceServer(oauth2ResourceServer -> {
+                    oauth2ResourceServer.jwt(Customizer.withDefaults());
+                })
                 .httpBasic(Customizer.withDefaults());
         return http.build();
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(getSecretKey()).macAlgorithm(MacAlgorithm.HS512).build();
+        return token -> {
+            try {
+                return jwtDecoder.decode(token);
+            } catch (Exception e) {
+                System.out.println(e);
+                throw e;
+            }
+        };
+    }
+
+
+    @Bean
+    public JwtEncoder jwtEncoder() {
+        return new NimbusJwtEncoder(new ImmutableSecret<>(getSecretKey()));
+    }
+
+
+    private SecretKey getSecretKey() {
+        byte[] keyBytes = Base64.from("MzJmZDkwNjk0ZDY1OGZkYThlZjM3YTY3MTk4ZGQyMmZmN2Q5MTljY2I5OGNjZjZiMzA0YTFhYWJhNDUyMzZiMzViMTA1MTJhNTY0YzlhMWNiZmNkOGE3YjY0OTNkNWMzODJkOTU1ZmJlNDUxOWZlNzNhZTQ2MGFkNDIwYmZiNGM=").decode();
+        return new SecretKeySpec(keyBytes, 0, keyBytes.length, MacAlgorithm.HS512.getName());
     }
 
 
