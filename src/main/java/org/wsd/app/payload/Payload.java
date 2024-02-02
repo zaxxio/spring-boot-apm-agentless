@@ -3,6 +3,7 @@ package org.wsd.app.payload;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.UUID;
 
 import lombok.Getter;
 import lombok.ToString;
@@ -10,13 +11,12 @@ import lombok.ToString;
 @Getter
 @ToString
 public class Payload<T> {
+    private UUID uuid = UUID.randomUUID();
     private final String message;
-    private final int status;
     private final T payload;
     private final Date timestamp;
 
-    private Payload(PayloadStatus status, String message, T payload) {
-        this.status = status.getCode();
+    private Payload(String message, T payload) {
         this.message = message;
         this.payload = payload;
         this.timestamp = Date.from(Instant.now()
@@ -26,16 +26,10 @@ public class Payload<T> {
 
     public static class Builder<T> {
         private String message;
-        private PayloadStatus status;
         private T payload;
 
         public Builder<T> message(String message) {
             this.message = message.toUpperCase();
-            return this;
-        }
-
-        public Builder<T> status(PayloadStatus status) {
-            this.status = status;
             return this;
         }
 
@@ -45,7 +39,7 @@ public class Payload<T> {
         }
 
         public Payload<T> build() {
-            return new Payload<>(status, message, payload);
+            return new Payload<>(message, payload);
         }
     }
 }

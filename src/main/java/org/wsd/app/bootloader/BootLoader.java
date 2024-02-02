@@ -8,11 +8,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.wsd.app.domain.RoleEntity;
 import org.wsd.app.domain.UserEntity;
 import org.wsd.app.repository.UserRepository;
 
+import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
+
 
 @Component
 public class BootLoader implements CommandLineRunner {
@@ -29,6 +31,9 @@ public class BootLoader implements CommandLineRunner {
         user.setUserId(UUID.randomUUID());
         user.setUsername("user");
         user.setPassword(passwordEncoder.encode("123456"));
+        RoleEntity role = new RoleEntity();
+        role.setName("USER");
+        user.setRoleEntities(Set.of(role));
         userRepository.save(user);
     }
 }
