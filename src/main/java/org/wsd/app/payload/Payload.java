@@ -11,7 +11,7 @@ import lombok.ToString;
 @Getter
 @ToString
 public class Payload<T> {
-    private UUID uuid = UUID.randomUUID();
+    private final UUID requestId = UUID.randomUUID();
     private final String message;
     private final T payload;
     private final Date timestamp;

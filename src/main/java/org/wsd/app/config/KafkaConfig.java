@@ -38,4 +38,13 @@ public class KafkaConfig {
                 .build();
     }
 
+    @Bean
+    public NewTopic sensorTopic() {
+        return TopicBuilder.name("sensor")
+                .partitions(1)
+                .replicas(1)
+                .compact()
+                .build();
+    }
+
 }

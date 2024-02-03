@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.wsd.app.payload.Payload;
 import org.wsd.app.security.auth.AuthenticationService;
 import org.wsd.app.security.auth.response.SignInResponse;
+import org.wsd.app.security.auth.response.SignUpResponse;
 import org.wsd.app.security.jwt.JwtConfig;
 import org.wsd.app.security.auth.resquest.SignInRequest;
 import org.wsd.app.security.auth.resquest.SignUpRequest;
@@ -27,18 +28,9 @@ import java.time.temporal.ChronoUnit;
 @RequestMapping("/api/auth")
 @Tag(name = "Authentication Controller")
 public class AuthenticationController {
-
-    private final JwtConfig jwtConfig;
-    private final JwtEncoder jwtEncoder;
-    private final AuthenticationManager authenticationManager;
     private final AuthenticationService authenticationService;
 
-    public AuthenticationController(JwtConfig jwtConfig, JwtEncoder jwtEncoder,
-                                    AuthenticationManager authenticationManager,
-                                    AuthenticationService authenticationService) {
-        this.jwtConfig = jwtConfig;
-        this.jwtEncoder = jwtEncoder;
-        this.authenticationManager = authenticationManager;
+    public AuthenticationController(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
     }
 
@@ -49,8 +41,8 @@ public class AuthenticationController {
     }
 
     @PostMapping(path = "/signUp", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public String signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
-        return "Hello World!";
+    public Payload<SignUpResponse> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
+        return authenticationService.signUp(signUpRequest);
     }
 
 }

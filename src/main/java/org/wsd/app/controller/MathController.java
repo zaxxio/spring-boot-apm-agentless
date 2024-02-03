@@ -5,6 +5,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,8 +27,9 @@ import org.wsd.app.security.config.SecurityContextPropagator;
 public class MathController {
 
     @GetMapping("/random")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String sayRandom(@AuthenticationPrincipal Jwt jwt) {
+        handleMe();
         return "Hello Mr. " + ThreadLocalRandom.current().nextInt(0, 10);
     }
 

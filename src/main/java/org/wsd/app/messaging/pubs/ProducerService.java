@@ -1,5 +1,6 @@
 package org.wsd.app.messaging.pubs;
 
+import kafka.Kafka;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -8,7 +9,9 @@ import org.springframework.messaging.Message;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.wsd.app.events.LocationEvent;
+import org.wsd.app.events.SensorEvent;
 
+import java.util.Map;
 import java.util.UUID;
 
 @Service

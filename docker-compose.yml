@@ -10,6 +10,9 @@ services:
       ZOOKEEPER_SERVER_ID: 1
     ports:
       - "2181:2181"
+    volumes:
+      - ./data/zookeeper:/var/lib/zookeeper/data
+      - ./data/zookeeper_log:/var/lib/zookeeper/log
   # Kafka Broker 1
   kafka-1:
     container_name: kafka1
@@ -24,6 +27,8 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_BROKER_ID: 1
+    volumes:
+      - ./data/kafka1:/var/lib/kafka/data
     depends_on:
       - zookeeper
 
@@ -41,6 +46,8 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_BROKER_ID: 2
+    volumes:
+      - ./data/kafka2:/var/lib/kafka/data
     depends_on:
       - zookeeper
 
@@ -58,6 +65,8 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_BROKER_ID: 3
+    volumes:
+      - ./data/kafka3:/var/lib/kafka/data
     depends_on:
       - zookeeper
 
