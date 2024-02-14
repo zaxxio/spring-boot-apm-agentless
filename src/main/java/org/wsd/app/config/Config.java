@@ -1,8 +1,12 @@
 package org.wsd.app.config;
 
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.java.Log;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.data.auditing.DateTimeProvider;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.scheduling.annotation.Async;
@@ -12,6 +16,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Optional;
@@ -22,13 +28,12 @@ import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.context.WebApplicationContext;
 
 @Log
 @Configuration
 @EnableAsync
 @EnableScheduling
-@EnableTransactionManagement
-@EnableJpaAuditing(auditorAwareRef = "auditorAware")
 public class Config {
 
     @Async("taskExecutorForHeavyTasks")
@@ -40,7 +45,6 @@ public class Config {
     public void sendEmailLight() {
         // for light task
     }
-
 
     @Primary
     @Bean("taskExecutorDefault")
@@ -64,19 +68,6 @@ public class Config {
         executor.setThreadNamePrefix("Async-Thread-Group-2-");
         executor.initialize();
         return executor;
-    }
-
-
-    @Bean
-    public AuditorAware<String> auditorAware() {
-        return () -> {
-            Authentication authentication = SecurityContextHolder.getContext()
-                    .getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
-                return Optional.of("SYSTEM");
-            }
-            return Optional.of(authentication.getName());
-        };
     }
 
     @Bean

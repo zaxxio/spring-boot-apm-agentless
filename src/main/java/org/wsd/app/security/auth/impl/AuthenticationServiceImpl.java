@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.wsd.app.domain.UserEntity;
 import org.wsd.app.payload.Payload;
 import org.wsd.app.repository.UserRepository;
@@ -41,6 +43,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     public Payload<SignInResponse> signIn(SignInRequest signInRequest) {
         Optional<UserEntity> userEntity = userRepository.findUserEntityByUsername(signInRequest.getUsername());
         if (userEntity.isEmpty()) {

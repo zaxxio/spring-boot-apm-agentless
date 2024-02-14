@@ -32,6 +32,7 @@ public class BootLoader implements CommandLineRunner {
     @Override
     @Transactional(isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRED)
     public void run(String... args) throws Exception {
+
         UserEntity user = new UserEntity();
         user.setUserId(UUID.randomUUID());
         user.setUsername("user");
@@ -42,7 +43,6 @@ public class BootLoader implements CommandLineRunner {
         userRepository.save(user);
 
         User userEntity = new User();
-        userEntity.setId(1);
         userEntity.setUsername("Partha Sutradhar");
         userEntity.setEmail("partharaj.dev@gmail.com");
 

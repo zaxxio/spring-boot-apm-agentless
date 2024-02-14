@@ -13,6 +13,8 @@ services:
     volumes:
       - ./data/zookeeper:/var/lib/zookeeper/data
       - ./data/zookeeper_log:/var/lib/zookeeper/log
+    networks:
+      - kafkanet
   # Kafka Broker 1
   kafka-1:
     container_name: kafka1
@@ -31,7 +33,8 @@ services:
       - ./data/kafka1:/var/lib/kafka/data
     depends_on:
       - zookeeper
-
+    networks:
+      - kafkanet
   # Kafka Broker 2
   kafka-2:
     container_name: kafka2
@@ -50,7 +53,8 @@ services:
       - ./data/kafka2:/var/lib/kafka/data
     depends_on:
       - zookeeper
-
+    networks:
+      - kafkanet
   # Kafka Broker 3
   kafka-3:
     container_name: kafka3
@@ -69,7 +73,8 @@ services:
       - ./data/kafka3:/var/lib/kafka/data
     depends_on:
       - zookeeper
-
+    networks:
+      - kafkanet
   # Prometheus Configuration
   prometheus:
     restart: always
@@ -116,13 +121,16 @@ services:
 
   # Zipkin for Distributed Network Tracing
   zipkin:
-    image: openzipkin/zipkin
+    image: openzipkin/zipkin:latest
     container_name: zipkin
     ports:
       - "9411:9411"
 
 
 networks:
+  kafkanet:
+    name: kafkanet
+    driver: bridge
   localprom:
     driver: bridge
 

@@ -44,7 +44,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = false,proxyTargetClass = true)
+@EnableMethodSecurity(prePostEnabled = false, proxyTargetClass = true)
 @SecurityScheme(name = "BEARER_TOKEN", scheme = "Bearer", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER)
 public class SecurityConfig {
 
@@ -83,8 +83,8 @@ public class SecurityConfig {
                         authorizeRequests
                                 .requestMatchers(PUBLIC_URLS).permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/auth/*").permitAll()
-                                .requestMatchers("/actuator/**")
-                                .authenticated()
+                                .requestMatchers(HttpMethod.POST, "/actuator/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .headers(config -> {

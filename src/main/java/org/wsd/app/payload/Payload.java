@@ -7,10 +7,12 @@ import java.util.UUID;
 
 import lombok.Getter;
 import lombok.ToString;
+import org.hibernate.dialect.PostgreSQLDialect;
 
 @Getter
 @ToString
 public class Payload<T> {
+
     private final UUID requestId = UUID.randomUUID();
     private final String message;
     private final T payload;
