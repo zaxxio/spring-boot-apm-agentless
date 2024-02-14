@@ -11,6 +11,7 @@ import org.wsd.app.domain.UserEntity;
 import org.wsd.app.dto.User;
 import org.wsd.app.dto.UserDTO;
 import org.wsd.app.mapper.UserMapper;
+import org.wsd.app.messaging.pubs.KafkaProducerService;
 import org.wsd.app.repository.UserRepository;
 
 import java.util.Set;
@@ -30,7 +31,6 @@ public class BootLoader implements CommandLineRunner {
     }
 
     @Override
-    @Transactional(isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRED)
     public void run(String... args) throws Exception {
 
         UserEntity user = new UserEntity();
@@ -52,7 +52,6 @@ public class BootLoader implements CommandLineRunner {
 
         User userMapper = UserMapper.INSTANCE.toEmployee(userDTO);
         System.out.println(userMapper);
-
 
     }
 }

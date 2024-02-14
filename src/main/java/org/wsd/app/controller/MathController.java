@@ -1,6 +1,7 @@
 package org.wsd.app.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +13,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.wsd.app.events.LocationEvent;
+import org.wsd.app.messaging.pubs.KafkaProducerService;
 import org.wsd.app.security.config.SecurityContextPropagator;
+import org.wsd.app.service.ImageService;
 
 
 @RestController
@@ -21,9 +25,19 @@ import org.wsd.app.security.config.SecurityContextPropagator;
 @SecurityRequirement(name = "BEARER_TOKEN")
 public class MathController {
 
+    @Autowired
+    private ImageService imageService;
+    @Autowired
+    private KafkaProducerService kafkaProducerService;
+
     @GetMapping("/random")
     public String sayRandom() {
         handleMe();
+        //imageService.retryService(null);
+        LocationEvent event = new LocationEvent();
+        event.setLongitude(Math.random());
+        event.setLatitude(Math.random());
+        kafkaProducerService.produce(event);
         return "Hello Mr. " + ThreadLocalRandom.current().nextInt(0, 10);
     }
 

@@ -115,14 +115,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Transactional(isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRED, readOnly = true)
     public UserDetailsService userDetailsService() {
         return username -> userRepository.findUserEntityByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found."));
     }
 
     @Bean
-    @Transactional(isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRED, readOnly = true)
     public AuthenticationProvider authenticationProvider() {
         final DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setPasswordEncoder(passwordEncoder());

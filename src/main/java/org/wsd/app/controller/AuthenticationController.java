@@ -1,5 +1,6 @@
 package org.wsd.app.controller;
 
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -27,6 +28,8 @@ public class AuthenticationController {
 
     @PostMapping(path = "/signIn", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Payload<SignInResponse> signIn(@Valid @RequestBody SignInRequest signInRequest) {
+        Counter counter = Counter.builder("TOTAL_SIGN_IN_REQUESTS").register(meterRegistry);
+        counter.increment();
         return authenticationService.signIn(signInRequest);
     }
 

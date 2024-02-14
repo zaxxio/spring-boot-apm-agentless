@@ -11,15 +11,19 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.Optional;
 
 @Configuration
-@EntityScan(basePackages = "org.wsd.app")
-@EnableTransactionManagement
+@EntityScan(basePackages = "org.wsd.app.domain")
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
 public class JpaConfig {
+
+    @Bean
+    @Primary
+    public PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+        return new JpaTransactionManager(entityManagerFactory);
+    }
 
     @Bean
     public AuditorAware<String> auditorAware() {
