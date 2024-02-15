@@ -26,7 +26,10 @@ public class AuthenticationController {
         this.authenticationService = authenticationService;
     }
 
-    @PostMapping(path = "/signIn", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/signIn",
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
+    )
     public Payload<SignInResponse> signIn(@Valid @RequestBody SignInRequest signInRequest) {
         Counter counter = Counter.builder("TOTAL_SIGN_IN_REQUESTS").register(meterRegistry);
         counter.increment();
