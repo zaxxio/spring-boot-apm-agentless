@@ -87,7 +87,6 @@ services:
       - localprom
     ports:
       - "9090:9090"
-
   # Grafana Configuration
   grafana:
     restart: always
@@ -116,7 +115,6 @@ services:
       - ./db/postgress/data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-
   # Zipkin for Distributed Network Tracing
   zipkin:
     image: openzipkin/zipkin:latest

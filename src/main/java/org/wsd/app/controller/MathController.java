@@ -30,7 +30,7 @@ public class MathController {
     @Autowired
     private KafkaProducerService kafkaProducerService;
 
-    @GetMapping("/random")
+    @GetMapping(value = "/random")
     public String sayRandom() {
         handleMe();
         //imageService.retryService(null);
