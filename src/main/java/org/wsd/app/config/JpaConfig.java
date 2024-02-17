@@ -28,7 +28,7 @@ public class JpaConfig {
     @Bean
     public AuditorAware<String> auditorAware() {
         return () -> {
-            Authentication authentication = SecurityContextHolder.getContext()
+            final Authentication authentication = SecurityContextHolder.getContext()
                     .getAuthentication();
             if (authentication == null || !authentication.isAuthenticated()) {
                 return Optional.of("SYSTEM");
