@@ -25,6 +25,8 @@ import java.util.concurrent.Executors;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.data.domain.AuditorAware;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -38,6 +40,11 @@ public class Config {
     @Async("taskExecutorForHeavyTasks")
     public void sendEmailHeavy() {
         // for heavy task
+    }
+
+    @Bean
+    PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
     }
 
     @Async("taskExecutorDefault")

@@ -33,7 +33,6 @@ public class KafkaConsumerService {
     private KafkaTemplate<?, ?> kafkaTemplate;
     private final Map<String, SensorEvent> eventMap = new HashMap<>();
 
-
     @KafkaListener(topics = "user-location", groupId = "user-group-1")
     @Transactional(transactionManager = "transactionManager")
     public void consume(@Payload LocationEvent locationEvent, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic, Acknowledgment acknowledgment) {

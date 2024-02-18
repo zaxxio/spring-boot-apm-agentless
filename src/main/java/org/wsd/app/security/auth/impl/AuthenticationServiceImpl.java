@@ -26,7 +26,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Service
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
@@ -75,6 +74,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         JwsHeader jwsHeader = JwsHeader.with(MacAlgorithm.HS512).build();
         String jwtToken = this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, accessTokenClaims)).getTokenValue();
         signInResponse.setAccessToken(jwtToken);
+        signInResponse.setTokenType("Bearer");
         return new Payload.Builder<SignInResponse>()
                 .message("Generated Access Token")
                 .payload(signInResponse)
