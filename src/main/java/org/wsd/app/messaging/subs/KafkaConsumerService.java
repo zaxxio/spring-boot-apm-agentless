@@ -53,7 +53,7 @@ public class KafkaConsumerService {
 
         System.out.println("Consumed : " + locationEvent);
 
-        //kafkaTemplate.executeInTransaction(tx -> tx.send(message));
+        kafkaTemplate.executeInTransaction(tx -> tx.send(message));
 
         if (goal) {
             throw new Exception("Game Play");

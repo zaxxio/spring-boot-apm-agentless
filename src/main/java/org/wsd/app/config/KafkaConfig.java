@@ -111,11 +111,10 @@ public class KafkaConfig {
     public NewTopic userLocationTopic() {
         return TopicBuilder.name("user-location")
                 .partitions(3)
-                .replicas(2)
+                .replicas(3)
                 .config(TopicConfig.CLEANUP_POLICY_CONFIG, TopicConfig.CLEANUP_POLICY_DELETE)
                 .config(TopicConfig.DELETE_RETENTION_MS_CONFIG, "200")
                 .config(TopicConfig.COMPRESSION_TYPE_CONFIG, "zstd")
-                .compact()
                 .build();
     }
 
@@ -123,10 +122,9 @@ public class KafkaConfig {
     public NewTopic sensorTopic() {
         return TopicBuilder.name("sensor")
                 .partitions(3)
-                .replicas(2)
+                .replicas(3)
                 .config(TopicConfig.CLEANUP_POLICY_CONFIG, TopicConfig.CLEANUP_POLICY_DELETE)
                 .config(TopicConfig.COMPRESSION_TYPE_CONFIG, "zstd")
-                .compact()
                 .build();
     }
 
