@@ -47,7 +47,6 @@ import javax.crypto.spec.SecretKeySpec;
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = false, proxyTargetClass = true)
 @SecurityScheme(name = "BEARER_TOKEN", scheme = "Bearer", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER)
-@Profile("prodicer")
 public class SecurityConfig {
 
     public static String[] PUBLIC_URLS = {

@@ -26,6 +26,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Service
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final AuthenticationManager authenticationManager;

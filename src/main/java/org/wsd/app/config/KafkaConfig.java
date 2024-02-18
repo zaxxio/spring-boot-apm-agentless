@@ -53,7 +53,7 @@ public class KafkaConfig {
     @Scope(scopeName = "prototype")
     public AdminClient adminClient() {
         Properties properties = new Properties();
-        properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,  bootstrapServers);
         properties.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, 60000); // 60 seconds
         return AdminClient.create(properties);
     }
@@ -62,7 +62,7 @@ public class KafkaConfig {
     public NewTopic userLocationTopic() {
         return TopicBuilder.name("user-location")
                 .partitions(3)
-                .replicas(3)
+                .replicas(1)
                 .config(TopicConfig.CLEANUP_POLICY_CONFIG, TopicConfig.CLEANUP_POLICY_COMPACT)
                 .config(TopicConfig.COMPRESSION_TYPE_CONFIG, "zstd")
                 .compact()
@@ -73,7 +73,7 @@ public class KafkaConfig {
     public NewTopic sensorTopic() {
         return TopicBuilder.name("sensor")
                 .partitions(3)
-                .replicas(3)
+                .replicas(1)
                 .config(TopicConfig.CLEANUP_POLICY_CONFIG, TopicConfig.CLEANUP_POLICY_COMPACT)
                 .config(TopicConfig.COMPRESSION_TYPE_CONFIG, "zstd")
                 .compact()

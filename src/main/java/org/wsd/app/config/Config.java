@@ -42,11 +42,6 @@ public class Config {
         // for heavy task
     }
 
-    @Bean
-    PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
-
     @Async("taskExecutorDefault")
     public void sendEmailLight() {
         // for light task

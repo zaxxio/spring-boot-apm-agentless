@@ -23,10 +23,10 @@ import org.wsd.app.security.auth.response.SignUpResponse;
 import org.wsd.app.security.auth.resquest.SignInRequest;
 import org.wsd.app.security.auth.resquest.SignUpRequest;
 
-/*@Log
+@Log
 @RestController
 @RequestMapping("/api/auth")
-@Tag(name = "Authentication Controller")*/
+@Tag(name = "Authentication Controller")
 public class AuthenticationController {
     private final MeterRegistry meterRegistry;
     private final AuthenticationService authenticationService;
