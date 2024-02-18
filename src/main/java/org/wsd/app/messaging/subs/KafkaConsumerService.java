@@ -32,10 +32,13 @@ public class KafkaConsumerService {
     @Autowired
     private KafkaTemplate<?, ?> kafkaTemplate;
     private final Map<String, SensorEvent> eventMap = new HashMap<>();
+    private boolean goal = false;
 
-    @KafkaListener(topics = "user-location", groupId = "user-group-1")
+
+    @KafkaListener(topics = "user-location", groupId = "user-group")
     @Transactional(transactionManager = "transactionManager")
-    public void consume(@Payload LocationEvent locationEvent, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic, Acknowledgment acknowledgment) {
+    public void consume(@Payload LocationEvent locationEvent, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic, Acknowledgment acknowledgment)
+            throws Exception {
         log.info("Key : " + topic + "Location : " + locationEvent.toString());
 
         SensorEvent sensorEvent = new SensorEvent();
@@ -48,56 +51,62 @@ public class KafkaConsumerService {
                 .setHeader(KafkaHeaders.KEY, UUID.randomUUID().toString())
                 .build();
 
-        kafkaTemplate.executeInTransaction(tx -> tx.send(message));
+        System.out.println("Consumed : " + locationEvent);
 
-        acknowledgment.acknowledge();
-    }
+        //kafkaTemplate.executeInTransaction(tx -> tx.send(message));
 
-
-    @KafkaListener(topicPartitions = @TopicPartition(topic = "sensor", partitions = {"0"}), groupId = "user-group-2")
-    @Transactional(transactionManager = "transactionManager")
-    public void consumeMessageGroup2(@Payload ConsumerRecord<String, SensorEvent> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic, Acknowledgment acknowledgment) {
-        try {
-            if (eventMap.containsKey(record.value())) {
-                System.out.println("Conflict");
-                return;
-            }
-            eventMap.put(record.key(), record.value());
-            // Process the message
-            SensorEvent sensorEvent = record.value();
-            log.info("Group 2 Key : " + topic);
-            log.info("G2 Sensor : " + sensorEvent.toString());
-            log.info("G2 Partition : " + record.partition());
-            // Acknowledge the message
-            acknowledgment.acknowledge();
-        } catch (Exception e) {
-            // Handle exception if needed
-            e.printStackTrace();
+        if (goal) {
+            throw new Exception("Game Play");
         }
 
+        // acknowledgment.acknowledge();
     }
 
-    @KafkaListener(topicPartitions = @TopicPartition(topic = "sensor", partitions = {"1"}), groupId = "user-group-3")
-    @Transactional(transactionManager = "transactionManager")
-    public void consumeMessageGroup3(@Payload ConsumerRecord<String, SensorEvent> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic, Acknowledgment acknowledgment) {
-        try {
-            if (eventMap.containsKey(record.value())) {
-                System.out.println("Conflict");
-                return;
-            }
-            eventMap.put(record.key(), record.value());
-            // Process the message
-            SensorEvent sensorEvent = record.value();
-            log.info("Group 3 Key : " + topic);
-            log.info("G3 Sensor : " + sensorEvent.toString());
-            log.info("G3 Partition : " + record.partition());
-            // Acknowledge the message
-            acknowledgment.acknowledge();
-        } catch (Exception e) {
-            // Handle exception if needed
-            e.printStackTrace();
-        }
 
-    }
+//    @KafkaListener(topicPartitions = @TopicPartition(topic = "sensor", partitions = {"0"}), groupId = "user-group-2")
+//    @Transactional(transactionManager = "transactionManager")
+//    public void consumeMessageGroup2(@Payload ConsumerRecord<String, SensorEvent> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic, Acknowledgment acknowledgment) {
+//        try {
+//            if (eventMap.containsKey(record.value())) {
+//                System.out.println("Conflict");
+//                return;
+//            }
+//            eventMap.put(record.key(), record.value());
+//            // Process the message
+//            SensorEvent sensorEvent = record.value();
+//            log.info("Group 2 Key : " + topic);
+//            log.info("G2 Sensor : " + sensorEvent.toString());
+//            log.info("G2 Partition : " + record.partition());
+//            // Acknowledge the message
+//            acknowledgment.acknowledge();
+//        } catch (Exception e) {
+//            // Handle exception if needed
+//            e.printStackTrace();
+//        }
+//
+//    }
+//
+//    @KafkaListener(topicPartitions = @TopicPartition(topic = "sensor", partitions = {"1"}), groupId = "user-group-3")
+//    @Transactional(transactionManager = "transactionManager")
+//    public void consumeMessageGroup3(@Payload ConsumerRecord<String, SensorEvent> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic, Acknowledgment acknowledgment) {
+//        try {
+//            if (eventMap.containsKey(record.value())) {
+//                System.out.println("Conflict");
+//                return;
+//            }
+//            eventMap.put(record.key(), record.value());
+//            // Process the message
+//            SensorEvent sensorEvent = record.value();
+//            log.info("Group 3 Key : " + topic);
+//            log.info("G3 Sensor : " + sensorEvent.toString());
+//            log.info("G3 Partition : " + record.partition());
+//            // Acknowledge the message
+//            acknowledgment.acknowledge();
+//        } catch (Exception e) {
+//            // Handle exception if needed
+//            e.printStackTrace();
+//        }
+//
+//    }
 
 }

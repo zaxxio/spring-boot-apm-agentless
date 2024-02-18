@@ -45,13 +45,16 @@ public class KafkaProducerService {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    //@Transactional("transactionManager")
+    @Transactional("transactionManager")
     public void produce(LocationEvent locationEvent) {
         final Message<LocationEvent> message = MessageBuilder
                 .withPayload(locationEvent)
                 .setHeader(KafkaHeaders.TOPIC, "user-location")
                 .setHeader(KafkaHeaders.KEY, UUID.randomUUID().toString())
                 .build();
+
+        //kafkaTemplate.send(message);
+
         CompletableFuture<? extends SendResult<?, ?>> future = kafkaTemplate.executeInTransaction(tx -> tx.send(message));
         future.thenAccept((sendResult -> {
             System.out.println("Message sent successfully : " + sendResult.getProducerRecord());
@@ -61,8 +64,7 @@ public class KafkaProducerService {
         });
     }
 
-    @Scheduled(fixedRate = 2000)
-    @Transactional("transactionManager")
+    @Scheduled(fixedRate = 100)
     public void call() {
         LocationEvent locationEvent = new LocationEvent();
         locationEvent.setLatitude(Math.random());
